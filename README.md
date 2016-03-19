@@ -36,6 +36,22 @@ install node 5.x for the front-end:
     cd /var/www/html
     npm install
 
+Install PostgreSQL:
+
+    sudo apt-get install postgresql-9.4 postgresql-server-dev-9.4
+    sudo su - postgres
+    createuser -P tangentschool
+    # (enter password twice)
+    # create database with same name, owned by this user
+    createdb -O tangentschool tangentschool
+    
+... with data:
+
+    psql -h localhost -U tangentschool
+    # <enter password>
+    \i /path/to/tangentschool/sql/tangentschool.sql
+
+
 now set up the python backend:
 
     mkdir /var/www/wsgi
