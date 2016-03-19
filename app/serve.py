@@ -8,7 +8,9 @@ import json
 def get_courses(env, start):
     """dummy wsgi resource to return a list of courses"""
     start('200 OK', [('Content-Type', 'application/json')])
-    return json.dumps(["course A", "course B", "course C"])
+    return json.dumps(
+        {"courses":
+            [{"name": c} for c in ["course A", "course B", "course C"]]})
 
 
 if __name__ == '__main__':
