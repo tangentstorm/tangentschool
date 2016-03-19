@@ -8,8 +8,6 @@ software to run an online course
 
 # deployment (ubuntu 15.10)
 
-    sudo apt-get install nginx
-
 Copy files to:
 
 | local | remote          |
@@ -17,4 +15,14 @@ Copy files to:
 | etc/* | /etc/*          |
 | web/* | /var/www/html/* |
 | app/* | (anywhere)      |
+
+Then:
+
+    sudo apt-get install nginx
+    # install node 5.x:
+    curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    cd /var/www/html
+    npm install
+
 
