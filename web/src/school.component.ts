@@ -2,6 +2,7 @@ import 'rxjs/add/operator/map';
 import {Component} from 'angular2/core';
 import {HTTP_PROVIDERS, Http} from 'angular2/http';
 import {Inject} from "angular2/core";
+import {Graph} from './graph';
 
 @Component({
   selector: 'school',
@@ -10,7 +11,10 @@ import {Inject} from "angular2/core";
     <ul>
       <li *ngFor="#course of courses">{{course.name}}</li>
     </ul>
-  `
+
+    <graph></graph>
+  `,
+  directives: [Graph]
 })
 export class SchoolComponent {
   courses = [];
