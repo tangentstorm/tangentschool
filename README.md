@@ -36,16 +36,32 @@ install node 5.x for the front-end:
     cd /var/www/html
     npm install
 
-Install PostgreSQL:
+Install PostgreSQL 9.5:
 
-    sudo apt-get install postgresql-9.4 postgresql-server-dev-9.4
+    sudo su -
+    echo 'deb http://apt.postgresql.org/pub/repos/apt/ wily-pgdg main' \
+        >  /etc/apt/sources.list.d/pgdg.list
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+        | apt-key add -
+    apt-get update
+    sudo apt-get install postgresql-9.5 postgresql-server-dev-9.5
+    
+    # make sure the 'port' line is set to '5432' (not 5433):
+    grep ^port  /etc/postgresql/9.5/main/postgresql.conf
+    # (fix if necessary)
+     
+    service postgresql restart
+    exit
+
+Create a user and database:
+
     sudo su - postgres
     createuser -P tangentschool
     # (enter password twice)
-    # create database with same name, owned by this user
     createdb -O tangentschool tangentschool
-    
-... with data:
+    exit
+
+add some data:
 
     psql -h localhost -U tangentschool
     # <enter password>
