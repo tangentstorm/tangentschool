@@ -12,9 +12,12 @@ def db_connect():
                             user="tangentschool", password="tangentschool")
 
 
-def list_courses():
+def get_cursor():
     dbc = db_connect()
-    cur = dbc.cursor()
+    return dbc.cursor()
+
+def list_courses():
+    cur = get_cursor()
     cur.execute("SELECT name FROM course ORDER BY ID")
     return cur.fetchall()
 
@@ -28,5 +31,44 @@ def get_courses(env, start):
             [{"name": c} for (c,) in courses]})
 
 
+def get_lessons(env, start):
+    """generate a json graph of the syllabus for a course, in d3's format"""
+    start('200 OK', [('Content-Type', 'application/json')])
+
+    cid = 1  # TODO: fetch from url
+    cur = get_cursor()
+    cur.execute(
+        """
+        select id, name from lesson
+        where id in (select x from prereq where cid=(%(cid)s)
+               union select y from prereq where cid=(%(cid)s))
+        """, {'cid': cid})
+
+    nodes = []  # list of node objects
+    idx = {}    # map node ids to indices in the array
+    for (i, (nid, name)) in enumerate(cur.fetchall()):
+        idx[nid] = i
+        nodes.append({'n': name})
+
+    cur.execute('select x, y from prereq where cid=1')
+    edges = [{'source': idx[x], 'target': idx[y]} for (x, y) in cur.fetchall()]
+
+    return json.dumps({'lessons': {"nodes": nodes, "edges": edges}})
+
+
+url_map = [
+    ("/courses", get_courses),
+    ("/lessons", get_lessons)]
+
+def dispatch(env, start):
+    path = env['PATH_INFO']
+    for prefix, handler in url_map:
+        if path.startswith(prefix):
+            return handler(env, start)
+    # no handler:
+    start('404 Not Found', [('Content-Type', 'application/json')])
+    return "{'error': 'not found'}"
+
+
 if __name__ == '__main__':
-    wsgi.server(eventlet.listen(('localhost', 5000)), get_courses)
+    wsgi.server(eventlet.listen(('localhost', 5000)), dispatch)
