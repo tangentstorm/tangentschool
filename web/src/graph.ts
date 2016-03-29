@@ -21,6 +21,7 @@ export class Graph {
     var force = d3.layout.force().charge(-250).linkDistance(45).size([640, 480]);
 
     console.log('in the Graph constructor');
+    console.log(['this.data:', this.data]);
     if (this.data == null) return;
 
     var data = this.data;
