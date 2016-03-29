@@ -12,18 +12,21 @@ import {Graph} from './graph';
       <li *ngFor="#course of courses">{{course.name}}</li>
     </ul>
 
-    <graph></graph>
+    <graph [data]="lessons"></graph>
   `,
   directives: [Graph]
 })
 export class SchoolComponent {
   courses = [];
+  lessons = {nodes:[], edges:[]};
+
   constructor(private http: Http) {
-    http.get('/api/courses')
-      .map(res => res.json())
-      .subscribe(
-        data => this.courses = data['courses'],
-        error => console.error(error)
-      );
+    this.withJson('/api/courses', data=> this.courses=data['courses']);
+    this.withJson('/api/lessons', data=> this.lessons=data['lessons']);
   }
+
+  withJson(path: string, cb:(any)=>void): void {
+    this.http.get(path).map(res=>res.json()).subscribe(data=>cb(data), error=>console.error(error));
+  }
+
 }
