@@ -4,20 +4,19 @@
  */
 import {Component} from "angular2/core";
 import {RouteParams} from "angular2/router";
-import {StageComponent} from "./stage";
-import {Http} from "angular2/http";
-import {HTTP_PROVIDERS} from "angular2/http";
+import {StageComponent, Step} from "./stage";
+import {Http, HTTP_PROVIDERS} from "angular2/http";
 
 @Component({
   template: `
     <h2>{{id}}</h2>
-    <stage [script]="script"></stage>`,
+    <stage [script]="steps"></stage>`,
   directives: [StageComponent],
   providers: [HTTP_PROVIDERS]
 })
-
 export class LessonComponent {
-  public id: string;
+  id: string;
+  steps: Array<Step>=[];
 
   constructor(
     private _routeParams:RouteParams,
@@ -25,5 +24,12 @@ export class LessonComponent {
 
   ngOnInit() {
     this.id = this._routeParams.get('id');
+    // TODO: extract a json service, since this is duplicated in courses
+    this._http.get('/api/steps/' + encodeURI(this.id))
+      .map(res=>res.json())
+      .subscribe(
+        data=>this.steps = data.steps,
+        error=>console.error(error));
   }
+
 }
