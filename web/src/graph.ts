@@ -25,13 +25,13 @@ export class Graph {
     this.svg.append('defs')
       .append('marker').attr({
         id: 'triangle',
-        viewBox: '0 0 10 10',
-        refX: '1',  refY:'5',
-        markerWidth: '6',
+        viewBox: '0 0 15 10',
+        refX: '0',  refY:'5',
+        markerWidth: '9',
         markerHeight: '6',
         orient: 'auto'})
       .append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z');
-    this.force = d3.layout.force().charge(-500).linkDistance(100).size([800, 600]);
+    this.force = d3.layout.force().charge(-750).linkDistance(100).size([800, 600]);
   }
 
   ngOnChanges(changes: {[propertyName: string]: SimpleChange}) {
@@ -69,11 +69,44 @@ export class Graph {
       .text(function(d:any){ return d.n }); // n for name, from the json.
 
     this.force.on("tick", function() {
-        links.attr({
-          "x1": function(d:any){ return d.source.x; },
-          "y1": function(d:any){ return d.source.y; },
-          "x2": function(d:any){ return d.target.x; },
-          "y2": function(d:any){ return d.target.y; }});
+        // the line comes out of the center of the source, but we need to
+        // find the point where it intersects the target so that we can
+        // actually see the arrowhead marker.
+        links.each(function(d:any){
+          var boxw=100, boxh=30;
+          var x1=d.source.x, y1=d.source.y+boxh/2,
+              x2=d.target.x, y2=d.target.y+boxh/2,
+              dx=x2-x1,  dy=y2-y1;
+
+          // imagine we translate everything so the source is the origin.
+          // the target will be at (dx,dy), and we know the box goes from
+          // dx-50,dy to dx+50,dy+30.  find the nearest sides (top/bottom) and (left/right):
+          var nx = Math.abs(dx-boxw/2) < Math.abs(dx+boxw/2) ? dx-boxw/2 : dx+boxw/2;
+          var ny = Math.abs(dy-boxh/2) < Math.abs(dy+boxh/2) ? dy-boxh/2 : dy+boxh/2;
+
+          // now find the nearer of those two:
+          if (Math.abs(ny) < Math.abs(nx)) {
+            // vertical side is closer, so solve for y
+            // y=(dy/dx)x+b; b=0  (because we run through the origin)
+            var rx = nx, ry =((dx == 0) ? dy : (dy/dx)*nx);
+          } else {
+            // horizontal side is closer, so solve for x
+            // x=(dx/dy)y-b; b=0
+            var ry = ny, rx = ((dy == 0) ? dx : (dx/dy)*ny);
+          }
+
+
+          var len = Math.sqrt(rx*rx + ry*ry);
+          var arh = 9; // arrow head size (markerWidth?)
+          if (len > arh) {
+            var scale = (len-arh)/len;
+            rx *= scale; ry *= scale;
+          }
+
+          d3.select(this).attr({
+            "x1": x1, "y1": y1,
+            "x2": x1+rx, "y2": y1+ry});
+        });
         boxes.attr({
           'transform': function(d:any){ return 'translate(' + d.x + ',' + d.y + ')'; }});
     });
