@@ -9,7 +9,9 @@
     "removeComments": false,
     "noImplicitAny": false
   },
-  "exclude": [
-    "node_modules"
+  "files": [
+    "src/school.component.ts",
+    "src/school.ts",
+    "src/graph.ts"
   ]
 }

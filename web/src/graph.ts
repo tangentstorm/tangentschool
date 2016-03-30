@@ -1,10 +1,11 @@
+/// <reference path="../typings/browser.d.ts" />
+
 // draw a directed graph with d3
 import {ElementRef} from "angular2/core";
 import {SimpleChange} from "angular2/core";
 import {Directive} from "angular2/core";
 import {Inject} from "angular2/core";
 import {Input} from "angular2/core";
-//import * as d3 from "d3";
 
 @Directive({
   selector: 'graph',
