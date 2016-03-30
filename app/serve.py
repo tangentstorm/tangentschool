@@ -16,6 +16,7 @@ def get_cursor():
     dbc = db_connect()
     return dbc.cursor()
 
+
 def list_courses():
     cur = get_cursor()
     cur.execute("SELECT name FROM course ORDER BY ID")
@@ -29,6 +30,23 @@ def get_courses(env, start):
     return json.dumps(
         {"courses":
             [{"name": c} for (c,) in courses]})
+
+
+def get_steps(env, start):
+    """get the steps for a particular lesson"""
+    start('200 OK', [('Content-Type', 'application/json')])
+    lesson_name = 'bits' # TODO: fetch from url
+    cur = get_cursor()
+    cur.execute(
+        """
+        SELECT s.id, s.op, (CASE s.op WHEN 4 THEN '' ELSE s.arg END) AS arg
+        FROM lesson
+        LEFT JOIN step s ON lesson.id=s.lid
+        WHERE lesson.name = %(lesson)s
+        ORDER BY s.seq;
+        """, {"lesson": lesson_name})
+    return json.dumps({'steps': [{'id': i, 'op': o, 'arg': a}
+                                 for (i, o, a) in cur.fetchall()]})
 
 
 def get_lessons(env, start):
@@ -58,7 +76,9 @@ def get_lessons(env, start):
 
 url_map = [
     ("/courses", get_courses),
-    ("/lessons", get_lessons)]
+    ("/lessons", get_lessons),
+    ("/steps", get_steps)]
+
 
 def dispatch(env, start):
     path = env['PATH_INFO']
