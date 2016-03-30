@@ -1,5 +1,6 @@
 html { font-family:verdana,arial,sans-serif; background: #336699; }
 html, body { padding: 0; margin: 0; overflow:hidden; }
-svg { width: 640px; height: 480px;}
 h1 { color:#ccc; background:black; width:100%; margin:0; font-size:16pt; padding:11px; }
 h1 strong { color:white; }
+graph { display: block; width: 100%; margin:0; padding:0; border:none; }
+

@@ -20,8 +20,18 @@ export class Graph {
 
   constructor(@Inject(ElementRef) elRef) {
     console.log('in the Graph constructor');
-    this.svg = d3.select(elRef.nativeElement).append('svg').attr({width: '100%', height: '100%'});
-    this.force = d3.layout.force().charge(-250).linkDistance(45).size([640, 480]);
+    this.svg = d3.select(elRef.nativeElement).append('svg').attr({width: '1200', height: '600'}).style({'background': "#eee"});
+    // triangle marker based on https://developer.mozilla.org/en-US/docs/Web/SVG/Element/marker
+    this.svg.append('defs')
+      .append('marker').attr({
+        id: 'triangle',
+        viewBox: '0 0 10 10',
+        refX: '1',  refY:'5',
+        markerWidth: '6',
+        markerHeight: '6',
+        orient: 'auto'})
+      .append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z');
+    this.force = d3.layout.force().charge(-500).linkDistance(100).size([800, 600]);
   }
 
   ngOnChanges(changes: {[propertyName: string]: SimpleChange}) {
@@ -38,15 +48,25 @@ export class Graph {
 
     var links = svg.selectAll("line.link").data(data.edges)
       .enter().append("line")
-      .attr("class", "link")
+      .attr({"class": "link",
+             "marker-end": "url(#triangle)"})
       .style({"stroke": "#000",
-              "stroke-width": 2 });
+              "stroke-width": 2});
 
-    var circs = svg.selectAll("circle.node").data(data.nodes)
-      .enter().append("circle")
-      .attr("class", "node")
-      .attr("r", 15)
-      .call(force.drag);
+    var boxes = svg.selectAll("g.node").data(data.nodes).enter()
+      .append("g")
+        .attr({"class": "node"})
+        .call(force.drag);
+
+    boxes.append('rect').attr({
+      x:-50,
+      width: 100,
+      height: 30,
+      fill: 'white',
+      stroke: '#333' });
+    boxes.append('text')
+      .attr({'x': -40,  'y': 20,})
+      .text(function(d:any){ return d.n }); // n for name, from the json.
 
     this.force.on("tick", function() {
         links.attr({
@@ -54,9 +74,8 @@ export class Graph {
           "y1": function(d:any){ return d.source.y; },
           "x2": function(d:any){ return d.target.x; },
           "y2": function(d:any){ return d.target.y; }});
-        circs.attr({
-          "cx": function(d:any){ return d.x; },
-          "cy": function(d:any){ return d.y; }});
+        boxes.attr({
+          'transform': function(d:any){ return 'translate(' + d.x + ',' + d.y + ')'; }});
     });
   }
 
