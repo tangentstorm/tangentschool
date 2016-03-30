@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>tangentschool</title>
+  <base href="/">
 
+  <!-- d3 and jquery -->
+  <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
   <!-- IE required polyfills, in this exact order -->
@@ -12,12 +15,11 @@
   <script src="node_modules/angular2/es6/dev/src/testing/shims_for_IE.js"></script>
   <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
   <script src="node_modules/systemjs/dist/system.src.js"></script>
+
   <script src="node_modules/rxjs/bundles/Rx.js"></script>
   <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
   <script src="node_modules/angular2/bundles/http.dev.js"></script>
-
-  <!-- d3, because i don't know how to load this via typescript yet. -->
-  <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="node_modules/angular2/bundles/router.dev.js"></script>
 
   <!-- bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">

@@ -10,8 +10,9 @@
     "noImplicitAny": false
   },
   "files": [
-    "src/school.component.ts",
     "src/school.ts",
+    "src/courses.ts",
+    "src/lesson.ts",
     "src/graph.ts"
   ]
 }
