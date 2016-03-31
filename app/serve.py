@@ -14,7 +14,9 @@ def db_connect():
 
 def get_cursor():
     dbc = db_connect()
+    dbc.autocommit = True
     return dbc.cursor()
+
 
 def list_courses():
     cur = get_cursor()
@@ -29,6 +31,23 @@ def get_courses(env, start):
     return json.dumps(
         {"courses":
             [{"name": c} for (c,) in courses]})
+
+
+def get_steps(env, start):
+    """get the steps for a particular lesson"""
+    start('200 OK', [('Content-Type', 'application/json')])
+    lesson_name = 'bits' # TODO: fetch from url
+    cur = get_cursor()
+    cur.execute(
+        """
+        SELECT s.id, s.op, (CASE s.op WHEN 4 THEN '' ELSE s.arg END) AS arg
+        FROM lesson
+        LEFT JOIN step s ON lesson.id=s.lid
+        WHERE lesson.name = %(lesson)s
+        ORDER BY s.seq;
+        """, {"lesson": lesson_name})
+    return json.dumps({'steps': [{'id': i, 'op': o, 'arg': a}
+                                 for (i, o, a) in cur.fetchall()]})
 
 
 def get_lessons(env, start):
@@ -56,9 +75,46 @@ def get_lessons(env, start):
     return json.dumps({'lessons': {"nodes": nodes, "edges": edges}})
 
 
+def save_answer(uid, sid, answer):
+    """store a record of the user's answer"""
+    cur = get_cursor()
+    cur.execute("""
+        INSERT INTO user_answer (uid, sid, answer)
+        VALUES (%(uid)s, %(sid)s, %(answer)s)
+    """, {"uid":uid, "sid":sid, "answer":answer})
+
+def check_answer(env, start):
+    """check a user's answer when they post one"""
+    if env['REQUEST_METHOD'] != 'POST':
+        start('405 METHOD NOT ALLOWED', [])
+        return "Use POST."
+    else:
+        uid = 1   # TODO: real user ids from session
+        data = json.loads(env['wsgi.input'].read())
+        # TODO: error handling/validation
+        sid = data['stepId']
+        answer = data['answer']
+
+        # save a copy of each answer attempt, for analytics
+        save_answer(uid, sid, answer)
+
+        cur = get_cursor()
+        cur.execute("SELECT op, arg FROM step WHERE id=%(sid)s", {"sid": sid})
+        op, arg = cur.fetchone()
+        assert op == 4  # CHK
+        goal, pos, neg = arg.split("|")
+
+        start('200 OK', [('Content-Type', 'application/json')])
+        return json.dumps({
+            "correct": answer == goal,
+            "message": pos if answer == goal else neg})
+
 url_map = [
+    ("/check", check_answer),
     ("/courses", get_courses),
-    ("/lessons", get_lessons)]
+    ("/lessons", get_lessons),
+    ("/steps", get_steps)]
+
 
 def dispatch(env, start):
     path = env['PATH_INFO']

@@ -60,3 +60,55 @@ select
   link(1, 'register', 'ram'),
   link(1, 'ram', 'fetch');
 
+
+
+-- this table is just for reference
+CREATE TABLE opcode (id INTEGER PRIMARY KEY, opcode VARCHAR(8), sig TEXT, docs TEXT);
+INSERT INTO opcode (id, opcode, sig, docs) VALUES
+  (1, '___', '-', 'marks start of new screen'),
+  (2, 'say', 's-', 'display text'),
+  (3, 'ask', '-s', 'show text box with question. push answer s to stack.'),
+  (4, 'chk', '(key|pos|neg) ans - bit', 'test answer against given key');
+
+-- steps table
+CREATE TABLE step (
+  id SERIAL PRIMARY KEY,
+  lid INTEGER NOT NULL REFERENCES lesson,
+  seq INTEGER NOT NULL,
+  op INTEGER NOT NULL REFERENCES opcode,
+  arg TEXT,
+  UNIQUE (lid, seq));
+
+
+-- dummy steps for a first "lesson":
+INSERT INTO step (lid, seq, op, arg) VALUES
+  (1, 1, 2, 'hello world'),
+  (1, 2, 2, 'this is a lesson about bits'),
+  (1, 3, 1, ''),
+  (1, 4, 2, 'A bit is the smallest unit of information. It represents a distinction between 2 choices.'),
+  (1, 5, 1, ''),
+  (1, 6, 3, 'How many choices can a single bit designate at once?'),
+  (1, 7, 4, '2|Very good!|Try again.');
+
+
+CREATE TABLE "user" (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(32) UNIQUE);
+INSERT INTO "user" VALUES (0, 'admin'), (1, 'guest');
+
+CREATE TABLE user_lesson (
+  id SERIAL PRIMARY KEY,
+  uid INTEGER NOT NULL REFERENCES "user",
+  lid INTEGER NOT NULL REFERENCES "lesson",
+  started TIMESTAMP,
+  finished TIMESTAMP,
+  status TEXT,
+  UNIQUE (uid, lid));
+
+CREATE TABLE user_answer (
+  id SERIAL PRIMARY KEY,
+  ts TIMESTAMP WITHOUT TIME ZONE
+    DEFAULT (now() AT TIME ZONE 'utc'),
+  uid INTEGER NOT NULL REFERENCES "user",
+  sid INTEGER NOT NULL REFERENCES "step",
+  answer TEXT);
