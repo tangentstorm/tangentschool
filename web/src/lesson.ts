@@ -4,19 +4,21 @@
  */
 import {Component} from "angular2/core";
 import {RouteParams} from "angular2/router";
-import {StageComponent, Step} from "./stage";
-import {Http, HTTP_PROVIDERS} from "angular2/http";
+import {StageComponent, Step, AnswerEvent, Result} from "./stage";
+import {Http, HTTP_PROVIDERS, Headers, RequestOptions} from "angular2/http";
 
 @Component({
   template: `
     <h2>{{id}}</h2>
-    <stage [script]="steps"></stage>`,
+    <stage [script]="steps" (checkWork)="checkAnswer($event)" [result]="result">
+    </stage>`,
   directives: [StageComponent],
   providers: [HTTP_PROVIDERS]
 })
 export class LessonComponent {
   id: string;
-  steps: Array<Step>=[];
+  steps: Step[]=[];
+  result: Result = {correct: true, message:"..."};
 
   constructor(
     private _routeParams:RouteParams,
@@ -31,5 +33,21 @@ export class LessonComponent {
         data=>this.steps = data.steps,
         error=>console.error(error));
   }
+
+  checkAnswer(e:AnswerEvent) {
+    this._http.post('/api/check', JSON.stringify(e),
+      new RequestOptions({
+        headers: new Headers({
+          'Content-Type': 'application/json' })}))
+    .map(res => res.json())
+    .subscribe(
+      (grade)=>this.tellUser(grade),
+      (error)=>console.error(error));
+  }
+
+  tellUser(grade: {correct: boolean, message: string}) {
+    this.result = grade;
+  }
+
 
 }

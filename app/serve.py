@@ -14,6 +14,7 @@ def db_connect():
 
 def get_cursor():
     dbc = db_connect()
+    dbc.autocommit = True
     return dbc.cursor()
 
 
@@ -74,7 +75,42 @@ def get_lessons(env, start):
     return json.dumps({'lessons': {"nodes": nodes, "edges": edges}})
 
 
+def save_answer(uid, sid, answer):
+    """store a record of the user's answer"""
+    cur = get_cursor()
+    cur.execute("""
+        INSERT INTO user_answer (uid, sid, answer)
+        VALUES (%(uid)s, %(sid)s, %(answer)s)
+    """, {"uid":uid, "sid":sid, "answer":answer})
+
+def check_answer(env, start):
+    """check a user's answer when they post one"""
+    if env['REQUEST_METHOD'] != 'POST':
+        start('405 METHOD NOT ALLOWED', [])
+        return "Use POST."
+    else:
+        uid = 1   # TODO: real user ids from session
+        data = json.loads(env['wsgi.input'].read())
+        # TODO: error handling/validation
+        sid = data['stepId']
+        answer = data['answer']
+
+        # save a copy of each answer attempt, for analytics
+        save_answer(uid, sid, answer)
+
+        cur = get_cursor()
+        cur.execute("SELECT op, arg FROM step WHERE id=%(sid)s", {"sid": sid})
+        op, arg = cur.fetchone()
+        assert op == 4  # CHK
+        goal, pos, neg = arg.split("|")
+
+        start('200 OK', [('Content-Type', 'application/json')])
+        return json.dumps({
+            "correct": answer == goal,
+            "message": pos if answer == goal else neg})
+
 url_map = [
+    ("/check", check_answer),
     ("/courses", get_courses),
     ("/lessons", get_lessons),
     ("/steps", get_steps)]
