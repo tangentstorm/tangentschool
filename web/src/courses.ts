@@ -12,7 +12,8 @@ import {Router} from "angular2/router";
       <li *ngFor="#course of courses">{{course.name}}</li>
     </ul>
     <div>
-      <button *ngFor="#lesson of lessons.nodes" (click)="goToLesson(lesson.n)"> {{lesson.n}} </button>
+      <button *ngFor="#lesson of lessons.nodes" (click)="goToLesson(lesson.n)"
+        [disabled]="!lesson.open"> {{lesson.n}} </button>
     </div>
     <graph [data]="lessons"></graph>
   `,

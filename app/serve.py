@@ -70,10 +70,14 @@ def get_lessons(env, start):
     idx = {}    # map node ids to indices in the array
     for (i, (lid, name, done)) in enumerate(cur.fetchall()):
         idx[lid] = i
-        nodes.append({'n': name, 'done': int(done)})
+        nodes.append({'n': name, 'done': done, 'open': True})
 
     cur.execute('SELECT x, y FROM prereq WHERE cid=1')
     edges = [{'source': idx[x], 'target': idx[y]} for (x, y) in cur.fetchall()]
+
+    for edge in edges:
+        if not nodes[edge['source']]['done']:
+            nodes[edge['target']]['open'] = False
 
     return json.dumps({'lessons': {"nodes": nodes, "edges": edges}})
 

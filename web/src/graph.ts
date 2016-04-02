@@ -50,7 +50,7 @@ export class Graph {
       .enter().append("line")
       .attr({"class": "link",
              "marker-end": "url(#triangle)"})
-      .style({"stroke": "#000",
+      .style({"stroke": "#ccc",
               "stroke-width": 2});
 
     var boxes = svg.selectAll("g.node").data(data.nodes).enter()
@@ -58,14 +58,17 @@ export class Graph {
         .attr({"class": "node"})
         .call(force.drag);
 
+    function bgColor(d: any){ return d.done ? '#ccc' : '#fff'}
+    function fgColor(d: any){ return d.open ? '#333' : '#ccc'}
+
     boxes.append('rect').attr({
       x:-50,
       width: 100,
       height: 30,
-      fill: function(d: any){ return d.done ? '#ccc' : '#fff'},
-      stroke: '#333' });
+      fill: bgColor,
+      stroke: fgColor });
     boxes.append('text')
-      .attr({'x': -40,  'y': 20,})
+      .attr({'x': -40,  'y': 20, fill: fgColor })
       .text(function(d:any){ return d.n }); // n for name, from the json.
 
     this.force.on("tick", function() {

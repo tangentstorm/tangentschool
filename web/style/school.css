@@ -3,4 +3,4 @@ html, body { padding: 0; margin: 0; overflow:hidden; }
 h1 { color:#ccc; background:black; width:100%; margin:0; font-size:16pt; padding:11px; }
 h1 strong { color:white; }
 graph { display: block; width: 100%; margin:0; padding:0; border:none; }
-
+button[disabled] { background: #eee; color: #999; border: #999; }
