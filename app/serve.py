@@ -55,21 +55,24 @@ def get_lessons(env, start):
     start('200 OK', [('Content-Type', 'application/json')])
 
     cid = 1  # TODO: fetch from url
+    uid = 1  # TODO: fetch from session
     cur = get_cursor()
     cur.execute(
         """
-        select id, name from lesson
-        where id in (select x from prereq where cid=(%(cid)s)
-               union select y from prereq where cid=(%(cid)s))
-        """, {'cid': cid})
+        SELECT cl.lid, l.name,
+           exists(SELECT * FROM user_lesson AS ul WHERE uid=%(uid)s
+                  AND finished IS NOT NULL AND ul.lid=cl.lid) AS done
+        FROM course_lessons cl, lesson l
+        WHERE cl.lid=l.id AND cl.cid=1;
+        """, {'cid': cid, 'uid': uid})
 
     nodes = []  # list of node objects
     idx = {}    # map node ids to indices in the array
-    for (i, (nid, name)) in enumerate(cur.fetchall()):
-        idx[nid] = i
-        nodes.append({'n': name})
+    for (i, (lid, name, done)) in enumerate(cur.fetchall()):
+        idx[lid] = i
+        nodes.append({'n': name, 'done': int(done)})
 
-    cur.execute('select x, y from prereq where cid=1')
+    cur.execute('SELECT x, y FROM prereq WHERE cid=1')
     edges = [{'source': idx[x], 'target': idx[y]} for (x, y) in cur.fetchall()]
 
     return json.dumps({'lessons': {"nodes": nodes, "edges": edges}})
@@ -81,7 +84,8 @@ def save_answer(uid, sid, answer):
     cur.execute("""
         INSERT INTO user_answer (uid, sid, answer)
         VALUES (%(uid)s, %(sid)s, %(answer)s)
-    """, {"uid":uid, "sid":sid, "answer":answer})
+    """, {"uid": uid, "sid": sid, "answer": answer})
+
 
 def check_answer(env, start):
     """check a user's answer when they post one"""
