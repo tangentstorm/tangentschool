@@ -19,6 +19,12 @@ CREATE TABLE prereq (
   UNIQUE (cid, x, y)
 );
 
+CREATE VIEW course_lessons AS
+  SELECT cid, x AS lid FROM prereq
+  UNION
+  SELECT cid, y from prereq;
+
+
 -- dummy data, just for now:
 INSERT INTO course (name)
 VALUES ('Intro'), ('Course A101'), ('Course B102'), ('Course C103');

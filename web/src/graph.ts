@@ -62,7 +62,7 @@ export class Graph {
       x:-50,
       width: 100,
       height: 30,
-      fill: 'white',
+      fill: function(d: any){ return d.done ? '#ccc' : '#fff'},
       stroke: '#333' });
     boxes.append('text')
       .attr({'x': -40,  'y': 20,})
