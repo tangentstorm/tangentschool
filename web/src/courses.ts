@@ -1,9 +1,9 @@
 import 'rxjs/add/operator/map';
 import {Component} from 'angular2/core';
 import {HTTP_PROVIDERS, Http} from 'angular2/http';
-import {Inject} from "angular2/core";
 import {Graph} from './graph';
-import {Router} from "angular2/router";
+import {Router, CanActivate} from "angular2/router";
+import {tokenNotExpired} from "angular2-jwt";
 
 @Component({
   providers: [HTTP_PROVIDERS],
@@ -19,6 +19,7 @@ import {Router} from "angular2/router";
   `,
   directives: [Graph]
 })
+@CanActivate(() => tokenNotExpired())
 export class CoursesComponent {
   courses = [];
   lessons = {nodes:[], edges:[]};
