@@ -22,6 +22,11 @@
   <script src="node_modules/angular2/bundles/http.dev.js"></script>
   <script src="node_modules/angular2/bundles/router.dev.js"></script>
 
+  <!-- Auth0 Lock script -->
+  <script src="//cdn.auth0.com/js/lock-9.0.min.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
   <!-- bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
@@ -33,7 +38,7 @@
 
   <h1>tangentschool</h1>
 
-  <school>(content goes here)</school>
+  <school>(loading...)</school>
 
   <script>
       System.config({
@@ -41,7 +46,13 @@
           src: {
             format: 'register',
             defaultExtension: 'js'
+          },
+          "angular2-jwt": {
+            defaultExtension: "js"
           }
+        },
+        map: {
+          "angular2-jwt": "node_modules/angular2-jwt/angular2-jwt.js"
         }
       });
       System.import('src/school')
