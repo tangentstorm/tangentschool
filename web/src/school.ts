@@ -23,6 +23,7 @@ import {Http} from "angular2/http";
   {path: '/lesson/:id', name: "Lesson", component: LessonComponent },
 ])
 class SchoolComponent {
+  //noinspection TypeScriptUnresolvedFunction
   lock = new Auth0Lock('EE3NW5dhZPOiv12MRp2FXE7Wt6caUbv3', 'tangentschool.auth0.com');
   username: string="";
 
